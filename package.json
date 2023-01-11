@@ -1,0 +1,16 @@
+{
+  "name": "cypress-plus",
+  "version": "0.0.1",
+  "description": "A collection of useful Cypress commands.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Hamed Fathi",
+  "license": "MIT",
+  "devDependencies": {
+    "cypress": "^12.3.0",
+    "typescript": "^4.9.4"
+  }
+}

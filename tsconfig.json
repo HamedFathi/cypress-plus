@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "target": "es5",
+    "lib": ["ESNext", "DOM"],
+    "types": ["cypress", "./cypress/support"],
+    "declaration": false,
+    "strict": true,
+    "moduleResolution": "node",
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["**/*.ts"]
+}
