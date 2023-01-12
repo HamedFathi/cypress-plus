@@ -72,6 +72,9 @@ declare module Cypress {
         selectFromDropdown(selector: string, value: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
         hover(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
 
+        getAttribute(selector: string, attribute: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<string | undefined>;
+        getAttributeDataCy(selector: string, attribute: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<string | undefined>;
+        getAttributeDataCyAdv(selector: string, attribute: string, moreSelectors: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<string | undefined>;
 
     }
 }

@@ -253,3 +253,22 @@ Cypress.Commands.add("clearSessionAndCookies", () => {
         cy.clearLocalStorage();
     });
 });
+
+Cypress.Commands.add("getAttribute", (selector: string, attribute: string, options?: any) => {
+    return cy.get(selector, options).then($el => {
+        return cy.wrap($el.attr(attribute));
+    });
+});
+
+Cypress.Commands.add("getAttributeDataCy", (selector: string, attribute: string, options?: any) => {
+    return cy.get(`[data-cy="${selector}"]`, options).then($el => {
+        return cy.wrap($el.attr(attribute));
+    });
+});
+
+Cypress.Commands.add("getAttributeDataCyAdv", (selector: string, attribute: string, moreSelectors: string, options?: any) => {
+    moreSelectors = moreSelectors ?? "";
+    return cy.get(`[data-cy="${selector}"] ${moreSelectors}`.trim(), options).then($el => {
+        return cy.wrap($el.attr(attribute));
+    });
+});
