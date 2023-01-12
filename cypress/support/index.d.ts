@@ -56,7 +56,7 @@ declare module Cypress {
         clickButton(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
         clickLink(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
         getByHref<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
-
+        
         waitForNotExistDataCy(selector: string, timeout: number): Chainable<JQuery<HTMLElement>>;
         waitForNotExist(selector: string, timeout: number): Chainable<JQuery<HTMLElement>>;
         waitForExistDataCy(selector: string, timeout: number): Chainable<JQuery<HTMLElement>>;
@@ -68,13 +68,21 @@ declare module Cypress {
         waitForElement<E extends Node = HTMLElement>(selector: string, timeout: number): Chainable<JQuery<E>>;
         waitForElementDataCy<E extends Node = HTMLElement>(selector: string, timeout: number): Chainable<JQuery<E>>;
         waitForElementDataCyAdv<E extends Node = HTMLElement>(selector: string, moreSelectors: string, timeout: number): Chainable<JQuery<E>>;
-
+        
         selectFromDropdown(selector: string, value: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
         hover(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
-
+        
         getAttribute(selector: string, attribute: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<string | undefined>;
         getAttributeDataCy(selector: string, attribute: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<string | undefined>;
         getAttributeDataCyAdv(selector: string, attribute: string, moreSelectors: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<string | undefined>;
+        
+        getParentIf(selector: string, condition: (parent: JQuery<HTMLElement>) => boolean, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+        getChildIf(selector: string, condition: (child: JQuery<HTMLElement>) => boolean, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+        getParentsIf(selector: string, condition: (parent: JQuery<HTMLElement>) => boolean, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>[]>;
+        getChildrenIf(selector: string, condition: (child: JQuery<HTMLElement>) => boolean, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>[]>;
+        
+        iterateChildren(selector: string, callback: (child: JQuery<HTMLElement>) => void, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+        iterateChildrenIf(selector: string, condition: (child: JQuery<HTMLElement>) => boolean, callback: (child: JQuery<HTMLElement>) => void, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
 
     }
 }

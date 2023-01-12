@@ -236,9 +236,6 @@ Cypress.Commands.add("waitForNotExistDataCy", (selector: string, timeout) => {
     return cy.get(`[data-cy="${selector}"]`, { timeout: timeout }).should('not.exist');
 });
 
-Cypress.Commands.add("navigateTo", (route: string) => {
-    return cy.visit(route);
-});
 Cypress.Commands.add("goBack", () => {
     return cy.go("back");
 });
@@ -270,5 +267,45 @@ Cypress.Commands.add("getAttributeDataCyAdv", (selector: string, attribute: stri
     moreSelectors = moreSelectors ?? "";
     return cy.get(`[data-cy="${selector}"] ${moreSelectors}`.trim(), options).then($el => {
         return cy.wrap($el.attr(attribute));
+    });
+});
+
+Cypress.Commands.add("getParentIf", (selector: string, condition: (parent: any) => boolean, options?: any) => {
+    return cy.get(selector, options).parents().each($el => {
+        if (condition($el)) return cy.wrap($el);
+    });
+});
+Cypress.Commands.add("getParentsIf", (selector: string, condition: (parent: any) => boolean, options?: any) => {
+    let result: JQuery<HTMLElement>[] = [];
+    cy.get(selector, options).parents().each($el => {
+        if (condition($el)) result.push($el);
+    });
+    return cy.wrap(result);
+});
+
+Cypress.Commands.add("getChildIf", (selector: string, condition: (child: any) => boolean, options?: any) => {
+    return cy.get(selector, options).children().each($el => {
+        if (condition($el)) return cy.wrap($el);
+    });
+});
+
+Cypress.Commands.add("getChildrenIf", (selector: string, condition: (child: any) => boolean, options?: any) => {
+    let result: JQuery<HTMLElement>[] = [];
+    cy.get(selector, options).children().each($el => {
+        if (condition($el)) result.push($el);
+    });
+    return cy.wrap(result);
+});
+
+Cypress.Commands.add("iterateChildren", (selector: string, callback: (child: any) => void, options?: any) => {
+    return cy.get(selector, options).find('*').each(($el) => {
+        callback($el);
+    });
+});
+
+Cypress.Commands.add("iterateChildrenIf", (selector: string, condition: (child: any) => boolean, callback: (child: any) => void, options?: any) => {
+    return cy.get(selector, options).find('*').each(($el) => {
+        if (condition($el))
+            callback($el);
     });
 });
