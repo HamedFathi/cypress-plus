@@ -1,6 +1,6 @@
 {
   "name": "cypress-plus",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A collection of useful Cypress commands.",
   "main": "index.js",
   "scripts": {
