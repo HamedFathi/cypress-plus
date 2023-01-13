@@ -37,26 +37,46 @@ const waitUntil = (subject: any, checkFunction: any, originalOptions = {}) => {
     if (!(checkFunction instanceof Function)) {
         throw new Error('`checkFunction` parameter should be a function. Found: ' + checkFunction)
     }
-
     const defaultOptions = {
         // base options
         interval: 200,
         timeout: 5000,
+        retry: 10,
         errorMsg: <any>'Timed out retrying',
         // log options
-        description: 'waitUntil',
+        description: 'polling',
         log: true,
         customMessage: undefined,
         logger: Cypress.log,
         verbose: false,
         customCheckMessage: undefined,
+        postFailure: <any>undefined,
+        customInterval: <any>undefined,
+        mode: 'timeout',
     }
     const options = { ...defaultOptions, ...originalOptions }
 
     // filter out a falsy passed "customMessage" value
     options.customMessage = <any>[options.customMessage, originalOptions].filter(Boolean)
 
-    let retries = Math.floor(options.timeout / options.interval)
+    let retries = Math.floor(options.timeout / options.interval);
+
+    let currentWaitTime: number | undefined;
+    let waitTime: number | number[] = 0;
+    if (Array.isArray(options.interval)) {
+        waitTime = options.interval.reverse();
+    } else {
+        waitTime = options.interval;
+    }
+    if (Array.isArray(options.interval)) {
+        if (options.interval.length > 1) {
+            currentWaitTime = (<number[]>waitTime).pop();
+        } else {
+            currentWaitTime = waitTime[0];
+        }
+    } else {
+        currentWaitTime = <number>waitTime;
+    }
 
     logCommand({ options, originalOptions })
 
@@ -67,7 +87,8 @@ const waitUntil = (subject: any, checkFunction: any, originalOptions = {}) => {
         }
         if (retries < 1) {
             const msg =
-                options.errorMsg instanceof Function ? options.errorMsg(result, options) : options.errorMsg
+                options.errorMsg instanceof Function ? options.errorMsg(result, options) : options.errorMsg;
+            if (options.postFailure && options.postFailure instanceof Function) options.postFailure();
             throw new Error(msg)
         }
         cy.wait(options.interval, { log: false }).then(() => {
