@@ -10,6 +10,172 @@
 // https://on.cypress.io/custom-commands
 // ***********************************************
 
+const logCommand = ({ options, originalOptions }) => {
+    if (options.log) {
+        options.logger({
+            name: options.description,
+            message: options.customMessage,
+            consoleProps: () => originalOptions,
+        })
+    }
+}
+const logCommandCheck = ({ result, options, originalOptions }) => {
+    if (!options.log || !options.verbose) return
+
+    const message = [result]
+    if (options.customCheckMessage) {
+        message.unshift(options.customCheckMessage)
+    }
+    options.logger({
+        name: options.description,
+        message,
+        consoleProps: () => originalOptions,
+    })
+}
+
+const waitUntil = (subject: any, checkFunction: any, originalOptions = {}) => {
+    if (!(checkFunction instanceof Function)) {
+        throw new Error('`checkFunction` parameter should be a function. Found: ' + checkFunction)
+    }
+
+    const defaultOptions = {
+        // base options
+        interval: 200,
+        timeout: 5000,
+        errorMsg: <any>'Timed out retrying',
+        // log options
+        description: 'waitUntil',
+        log: true,
+        customMessage: undefined,
+        logger: Cypress.log,
+        verbose: false,
+        customCheckMessage: undefined,
+    }
+    const options = { ...defaultOptions, ...originalOptions }
+
+    // filter out a falsy passed "customMessage" value
+    options.customMessage = <any>[options.customMessage, originalOptions].filter(Boolean)
+
+    let retries = Math.floor(options.timeout / options.interval)
+
+    logCommand({ options, originalOptions })
+
+    const check = (result: any) => {
+        logCommandCheck({ result, options, originalOptions })
+        if (result) {
+            return result
+        }
+        if (retries < 1) {
+            const msg =
+                options.errorMsg instanceof Function ? options.errorMsg(result, options) : options.errorMsg
+            throw new Error(msg)
+        }
+        cy.wait(options.interval, { log: false }).then(() => {
+            retries--
+            return resolveValue()
+        })
+    }
+
+    const resolveValue = () => {
+        const result = checkFunction(subject)
+
+        const isAPromise = Boolean(result && result.then)
+        if (isAPromise) {
+            return result.then(check)
+        } else {
+            return check(result)
+        }
+    }
+
+    return resolveValue()
+}
+const polling = (subject: any, checkFunction: any, originalOptions = {}) => {
+    if (!(checkFunction instanceof Function)) {
+        throw new Error("`checkFunction` parameter should be a function. Found: " + checkFunction);
+    }
+
+    const defaultOptions = {
+        // base options
+        time: 1000,
+        retries: 10,
+        errorMsg: <any>"Retried too many times.",
+        // log options
+        description: "polling",
+        log: true,
+        customMessage: undefined,
+        logger: Cypress.log,
+        verbose: false,
+        customCheckMessage: undefined,
+        postTimeout: <any>undefined
+    };
+    const options = { ...defaultOptions, ...originalOptions };
+
+    // filter out a falsy passed "customMessage" value
+    options.customMessage = <any>[options.customMessage, originalOptions].filter(Boolean);
+
+    let wt: number | undefined;
+    let waitTime: number | number[] = 0;
+    if (Array.isArray(options.time)) {
+        waitTime = options.time.reverse();
+    } else {
+        waitTime = options.time;
+    }
+    if (Array.isArray(options.time)) {
+        if (options.time.length > 1) {
+            wt = (<number[]>waitTime).pop();
+        } else {
+            wt = waitTime[0];
+        }
+    } else {
+        wt = <number>waitTime;
+    }
+
+    logCommand({ options, originalOptions });
+
+    const check = (result) => {
+        logCommandCheck({ result, options, originalOptions });
+        if (Array.isArray(options.time)) {
+            if (options.time.length > 1) {
+                wt = (<number[]>waitTime).pop();
+            } else {
+                wt = waitTime[0];
+            }
+        } else {
+            wt = <number>waitTime;
+        }
+        if (result) {
+            return result;
+        }
+        if (options.retries < 1) {
+            const msg =
+                <any>options.errorMsg instanceof Function ? options.errorMsg(result, options) : options.errorMsg;
+            if (options.postTimeout) options.postTimeout();
+            throw new Error(msg);
+        }
+        if (wt) {
+            cy.wait(wt, { log: false }).then(() => {
+                options.retries--;
+                return resolveValue();
+            });
+        }
+    };
+
+    const resolveValue = () => {
+        const result = checkFunction(subject);
+        const isAPromise = Boolean(result && result.then);
+        if (isAPromise) {
+            return result.then(check);
+        } else {
+            return check(result);
+        }
+    };
+
+    return resolveValue();
+};
+
+Cypress.Commands.add("polling", { prevSubject: "optional" }, polling);
+Cypress.Commands.add('waitUntil', { prevSubject: 'optional' }, waitUntil);
+
 Cypress.Commands.add("getByDataCy", (selector: string, options?: any) => {
     return cy.get(`[data-cy="${selector}"]`, options);
 });
@@ -309,3 +475,4 @@ Cypress.Commands.add("iterateChildrenIf", (selector: string, condition: (child: 
             callback($el);
     });
 });
+
