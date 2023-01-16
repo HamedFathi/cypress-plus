@@ -148,9 +148,6 @@ Cypress.Commands.add("waitForUrlToChange", (currentUrl: string, timeout: number)
     return cy.url().should("not.eq", currentUrl);
 });
 
-Cypress.Commands.add("scrollTo", (selector: string, options?: any) => {
-    return cy.get(selector, options).scrollIntoView();
-});
 Cypress.Commands.add("assertElementsCount", (selector: string, count: number, lengthComparison: "equal" | "above" | "below" | "atMost" | "atLeast", options?: any) => {
     if (count <= 0)
         count = 0;
@@ -291,9 +288,7 @@ Cypress.Commands.add("getFirstNth", (selector: string, nth: number, options?: an
 Cypress.Commands.add("getLastNth", (selector: string, nth: number, options?: any) => {
     return cy.get(selector, options).last().prevAll().eq(nth);
 });
-Cypress.Commands.add("focus", (selector: string, options?: any) => {
-    return cy.get(selector, options).focus();
-});
+
 Cypress.Commands.add("getByAriaDescribedBy", (ariaDescribedBy: string, options?: any) => {
     return cy.get(`[aria-describedby='${ariaDescribedBy}']`, options);
 });

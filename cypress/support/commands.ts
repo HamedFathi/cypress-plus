@@ -1,1 +1,1 @@
-import '../../commands';
+import '../../dist/esm/commands';

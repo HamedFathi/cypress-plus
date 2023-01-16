@@ -1,39 +1,41 @@
 {
-  "name": "cypress-plus",
-  "version": "0.0.7",
-  "description": "A bunch of useful Cypress commands with full TypeScript support.",
-  "scripts": {
-    "build": "tsc --project ./tsconfig.json"
-  },
-  "keywords": [
-    "javascript",
-    "typescript",
-    "cypress",
-    "utilities",
-    "commands",
-    "custom-commands",
-    "helpers"
-  ],
-  "homepage": "https://github.com/HamedFathi/cypress-plus",
-  "bugs": {
-    "url": "https://github.com/HamedFathi/cypress-plus/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/HamedFathi/cypress-plus"
-  },
-  "source": "./commands.ts",
-  "main": "./commands.js",
-  "types": "./index.d.ts",
-  "typings": "./index.d.ts",
-  "engines": {
-    "node": ">=12",
-    "npm": ">=6"
-  },
-  "author": "Hamed Fathi",
-  "license": "MIT",
-  "devDependencies": {
-    "cypress": "^12.3.0",
-    "typescript": "^4.9.4"
-  }
+    "name": "cypress-plus",
+    "version": "0.0.8",
+    "description": "A bunch of useful Cypress commands with full TypeScript support.",
+    "scripts": {
+        "build": "rimraf dist && tsc && tsc --build tsconfig.commonjs.json"
+    },
+    "keywords": [
+        "javascript",
+        "typescript",
+        "cypress",
+        "utilities",
+        "commands",
+        "custom-commands",
+        "helpers"
+    ],
+    "homepage": "https://github.com/HamedFathi/cypress-plus",
+    "bugs": {
+        "url": "https://github.com/HamedFathi/cypress-plus/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/HamedFathi/cypress-plus"
+    },
+    "source": "commands.ts",
+    "main": "dist/commonjs/commands.js",
+    "module": "dist/esm/commands.js",
+    "types": "index.d.ts",
+    "typings": "index.d.ts",
+    "engines": {
+        "node": ">=12",
+        "npm": ">=6"
+    },
+    "author": "Hamed Fathi",
+    "license": "MIT",
+    "devDependencies": {
+        "cypress": "^12.3.0",
+        "typescript": "^4.9.4",
+        "rimraf": "^4.0.7"
+    }
 }
