@@ -84,10 +84,6 @@ declare module Cypress {
         iterateChildren(selector: string, callback: (child: JQuery<HTMLElement>) => void, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
         iterateChildrenIf(selector: string, condition: (child: JQuery<HTMLElement>) => boolean, callback: (child: JQuery<HTMLElement>) => void, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
 
-        waitUntil<ReturnType = any>(
-            checkFunction: (subject: Subject | undefined) => ReturnType | Chainable<ReturnType> | Promise<ReturnType>,
-            options?: WaitUntilOptions<Subject>
-        ): Chainable<Subject>
         polling<ReturnType = any>(
             checkFunction: (subject: Subject | undefined) => ReturnType | Chainable<ReturnType> | Promise<ReturnType>,
             options?: PollingOptions<Subject>,
@@ -101,34 +97,16 @@ type PollingErrorMsgCallback<Subject = any> = (result: Subject, options: Polling
 
 interface PollingOptions<Subject = any> {
     retries?: number;
-    time?: number | number[];
-    errorMsg?: string | PollingErrorMsgCallback<Subject>;
+    timeout?: number;
+    interval: number | number[];
+    errorMessage?: string | PollingErrorMsgCallback<Subject>;
     description?: string;
-    customMessage?: string;
+    customLogMessage?: string;
     verbose?: boolean;
-    customCheckMessage?: string;
+    customLogCheckMessage?: string;
     logger?: (logOptions: PollingLog) => any;
     log?: boolean;
-    postTimeout?: () => void,
+    mode: 'timeout' | 'retry',
+    ignoreTimeoutError?: boolean,
+    postFailure?: () => void,
 }
-
-type WaitUntilLog = Pick<Cypress.LogConfig, 'name' | 'message' | 'consoleProps'>
-
-type ErrorMsgCallback<Subject = any> = (
-    result: Subject,
-    options: WaitUntilOptions<Subject>
-) => string
-
-interface WaitUntilOptions<Subject = any> {
-    timeout?: number
-    interval?: number
-    errorMsg?: string | ErrorMsgCallback<Subject>
-    description?: string
-    customMessage?: string
-    verbose?: boolean
-    customCheckMessage?: string
-    logger?: (logOptions: WaitUntilLog) => any
-    log?: boolean
-}
-
-type PollingMode = 'timeout' | 'retry' | 'customRetry';

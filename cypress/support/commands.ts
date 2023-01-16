@@ -1,20 +1,10 @@
 /// <reference types="cypress" />
 
-// ***********************************************
-// This example commands.ts shows you how to
-// create various custom commands and overwrite
-// existing commands.
-//
-// For more comprehensive examples of custom
-// commands please read more here:
-// https://on.cypress.io/custom-commands
-// ***********************************************
-
 const logCommand = ({ options, originalOptions }) => {
     if (options.log) {
         options.logger({
             name: options.description,
-            message: options.customMessage,
+            message: options.customLogMessage,
             consoleProps: () => originalOptions,
         })
     }
@@ -23,8 +13,8 @@ const logCommandCheck = ({ result, options, originalOptions }) => {
     if (!options.log || !options.verbose) return
 
     const message = [result]
-    if (options.customCheckMessage) {
-        message.unshift(options.customCheckMessage)
+    if (options.customLogCheckMessage) {
+        message.unshift(options.customLogCheckMessage)
     }
     options.logger({
         name: options.description,
@@ -35,36 +25,34 @@ const logCommandCheck = ({ result, options, originalOptions }) => {
 
 const polling = (subject: any, checkFunction: any, originalOptions = {}) => {
     if (!(checkFunction instanceof Function)) {
-        throw new Error('`checkFunction` parameter should be a function. Found: ' + checkFunction)
+        throw new Error(`'checkFunction' parameter should be a function. Found: ` + checkFunction)
     }
     const defaultOptions = {
-        // base options
         interval: 200,
         timeout: 5000,
-        retries: 10,
-        errorMsg: <any>'Timed out retrying',
-        // log options
+        retries: 25,
+        errorMessage: <any>'Timed out retrying.',
         description: 'polling',
         log: true,
-        customMessage: undefined,
+        customLogMessage: undefined,
         logger: Cypress.log,
         verbose: false,
-        customCheckMessage: undefined,
+        customLogCheckMessage: undefined,
         postFailure: <any>undefined,
-        customInterval: <any>undefined,
         mode: 'timeout',
         ignoreTimeoutError: false,
-    }
-    const options = { ...defaultOptions, ...originalOptions }
+    };
+    const options = { ...defaultOptions, ...originalOptions };
 
-    // filter out a falsy passed "customMessage" value
-    options.customMessage = <any>[options.customMessage, originalOptions].filter(Boolean)
+    options.customLogMessage = <any>[options.customLogMessage, originalOptions].filter(Boolean);
 
     let retries: number = 0;
     if (options.mode == 'timeout') {
         retries = Math.floor(options.timeout / options.interval);
+        options.errorMessage = 'Timed out retrying.'
     } else {
         retries = options.retries;
+        options.errorMessage = 'Retried too many times.'
     }
 
     let currentWaitTime: number | undefined;
@@ -84,7 +72,7 @@ const polling = (subject: any, checkFunction: any, originalOptions = {}) => {
         currentWaitTime = <number>waitTime;
     }
 
-    logCommand({ options, originalOptions })
+    logCommand({ options, originalOptions });
 
     const check = (result: any) => {
         logCommandCheck({ result, options, originalOptions });
@@ -98,14 +86,14 @@ const polling = (subject: any, checkFunction: any, originalOptions = {}) => {
             currentWaitTime = <number>waitTime;
         }
         if (result) {
-            return result
+            return result;
         }
         if (retries < 1) {
             const msg =
-                options.errorMsg instanceof Function ? options.errorMsg(result, options) : options.errorMsg;
+                options.errorMessage instanceof Function ? options.errorMessage(result, options) : options.errorMessage;
             if (options.postFailure && options.postFailure instanceof Function) options.postFailure();
             if (!options.ignoreTimeoutError)
-                throw new Error(msg)
+                throw new Error(msg);
         }
         if (currentWaitTime) {
             cy.wait(currentWaitTime, { log: false }).then(() => {
@@ -116,17 +104,16 @@ const polling = (subject: any, checkFunction: any, originalOptions = {}) => {
     }
 
     const resolveValue = () => {
-        const result = checkFunction(subject)
-
-        const isAPromise = Boolean(result && result.then)
+        const result = checkFunction(subject);
+        const isAPromise = Boolean(result && result.then);
         if (isAPromise) {
-            return result.then(check)
+            return result.then(check);
         } else {
-            return check(result)
+            return check(result);
         }
     }
 
-    return resolveValue()
+    return resolveValue();
 }
 
 Cypress.Commands.add("polling", { prevSubject: "optional" }, polling);
@@ -179,6 +166,7 @@ Cypress.Commands.add("assertElementsCount", (selector: string, count: number, le
             return cy.get(selector, options).should('have.length.at.most', count);
     }
 });
+
 Cypress.Commands.add("getCount", (selector: string, options?: any) => {
     return cy.get(selector, options).then($elements => {
         let countOfElements = $elements.length;
