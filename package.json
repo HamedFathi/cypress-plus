@@ -1,10 +1,9 @@
 {
   "name": "cypress-plus",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "A bunch of useful Cypress commands with full TypeScript support.",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc --project ./tsconfig.json"
   },
   "keywords": [
     "javascript",
@@ -24,6 +23,7 @@
     "url": "https://github.com/HamedFathi/cypress-plus"
   },
   "source": "./commands.ts",
+  "main": "./commands.js",
   "types": "./index.d.ts",
   "typings": "./index.d.ts",
   "engines": {
