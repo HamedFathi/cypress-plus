@@ -39,7 +39,7 @@ function polling(subject: any, checkFunction: any, originalOptions = {}) {
         logger: Cypress.log,
         verbose: false,
         customLogCheckMessage: undefined,
-        postFailure: <any>undefined,
+        postFailureAction: <any>undefined,
         mode: 'timeout',
         ignoreTimeoutError: false,
     }
@@ -91,8 +91,8 @@ function polling(subject: any, checkFunction: any, originalOptions = {}) {
         }
         if (retries < 1) {
             const msg = options.errorMessage instanceof Function ? options.errorMessage(result, options) : options.errorMessage
-            if (options.postFailure && options.postFailure instanceof Function)
-                options.postFailure()
+            if (options.postFailureAction && options.postFailureAction instanceof Function)
+                options.postFailureAction()
             if (!options.ignoreTimeoutError)
                 throw new Error(msg)
         }
@@ -123,8 +123,32 @@ Cypress.Commands.add("getByDataCy", (selector: string, options?: any) => {
     return cy.get(`[data-cy="${selector}"]`, options);
 });
 
+Cypress.Commands.add("getByDataCyStartsWith", (selector: string, options?: any) => {
+    return cy.get(`[data-cy^="${selector}"]`, options);
+});
+
+Cypress.Commands.add("getByDataCyEndsWith", (selector: string, options?: any) => {
+    return cy.get(`[data-cy$="${selector}"]`, options);
+});
+
+Cypress.Commands.add("getByDataCyContains", (selector: string, options?: any) => {
+    return cy.get(`[data-cy*="${selector}"]`, options);
+});
+
 Cypress.Commands.add("getByData", (dataName: string, selector: string, options?: any) => {
     return cy.get(`[data-${dataName}="${selector}"]`, options);
+});
+
+Cypress.Commands.add("getByDataStartsWith", (dataName: string, selector: string, options?: any) => {
+    return cy.get(`[data-${dataName}^="${selector}"]`, options);
+});
+
+Cypress.Commands.add("getByDataEndsWith", (dataName: string, selector: string, options?: any) => {
+    return cy.get(`[data-${dataName}$="${selector}"]`, options);
+});
+
+Cypress.Commands.add("getByDataContains", (dataName: string, selector: string, options?: any) => {
+    return cy.get(`[data-${dataName}*="${selector}"]`, options);
 });
 
 Cypress.Commands.add("getByDataAdv", (dataName: string, selector: string, moreSelectors: string, options?: any) => {
@@ -261,6 +285,15 @@ Cypress.Commands.add("uncheckCheckbox", (selector: string, options?: any) => {
 Cypress.Commands.add("getByClass", (className: string, options?: any) => {
     return cy.get(`.${className}`, options);
 });
+Cypress.Commands.add("getByClassStartsWith", (className: string, options?: any) => {
+    return cy.get(`[class^="${className}"]`, options);
+});
+Cypress.Commands.add("getByClassEndsWith", (className: string, options?: any) => {
+    return cy.get(`[class$="${className}"]`, options);
+});
+Cypress.Commands.add("getByClassContains", (className: string, options?: any) => {
+    return cy.get(`[class*="${className}"]`, options);
+});
 Cypress.Commands.add("clickButton", (buttonText: string, options?: any) => {
     return cy.get(`button:contains("${buttonText}")`, options).click();
 });
@@ -354,6 +387,19 @@ Cypress.Commands.add("clearSessionAndCookies", () => {
         cy.clearCookies();
         cy.clearLocalStorage();
     });
+});
+
+Cypress.Commands.add("getAttributeByValue", (attrName: string, attrValue: string, options?: any) => {
+    return cy.get(`[${attrName}="${attrValue}"]`, options);
+});
+Cypress.Commands.add("getAttributeByValueStartsWith", (attrName: string, attrValue: string, options?: any) => {
+    return cy.get(`[${attrName}^="${attrValue}"]`, options);
+});
+Cypress.Commands.add("getAttributeByValueEndsWith", (attrName: string, attrValue: string, options?: any) => {
+    return cy.get(`[${attrName}$="${attrValue}"]`, options);
+});
+Cypress.Commands.add("getAttributeByValueContains", (attrName: string, attrValue: string, options?: any) => {
+    return cy.get(`[${attrName}*="${attrValue}"]`, options);
 });
 
 Cypress.Commands.add("getAttribute", (selector: string, attribute: string, options?: any) => {
