@@ -33,7 +33,7 @@ const logCommandCheck = ({ result, options, originalOptions }) => {
     })
 }
 
-const waitUntil = (subject: any, checkFunction: any, originalOptions = {}) => {
+const polling = (subject: any, checkFunction: any, originalOptions = {}) => {
     if (!(checkFunction instanceof Function)) {
         throw new Error('`checkFunction` parameter should be a function. Found: ' + checkFunction)
     }
@@ -41,7 +41,7 @@ const waitUntil = (subject: any, checkFunction: any, originalOptions = {}) => {
         // base options
         interval: 200,
         timeout: 5000,
-        retry: 10,
+        retries: 10,
         errorMsg: <any>'Timed out retrying',
         // log options
         description: 'polling',
@@ -53,13 +53,19 @@ const waitUntil = (subject: any, checkFunction: any, originalOptions = {}) => {
         postFailure: <any>undefined,
         customInterval: <any>undefined,
         mode: 'timeout',
+        ignoreTimeoutError: false,
     }
     const options = { ...defaultOptions, ...originalOptions }
 
     // filter out a falsy passed "customMessage" value
     options.customMessage = <any>[options.customMessage, originalOptions].filter(Boolean)
 
-    let retries = Math.floor(options.timeout / options.interval);
+    let retries: number = 0;
+    if (options.mode == 'timeout') {
+        retries = Math.floor(options.timeout / options.interval);
+    } else {
+        retries = options.retries;
+    }
 
     let currentWaitTime: number | undefined;
     let waitTime: number | number[] = 0;
@@ -81,7 +87,16 @@ const waitUntil = (subject: any, checkFunction: any, originalOptions = {}) => {
     logCommand({ options, originalOptions })
 
     const check = (result: any) => {
-        logCommandCheck({ result, options, originalOptions })
+        logCommandCheck({ result, options, originalOptions });
+        if (Array.isArray(options.interval)) {
+            if (options.interval.length > 1) {
+                currentWaitTime = (<number[]>waitTime).pop();
+            } else {
+                currentWaitTime = waitTime[0];
+            }
+        } else {
+            currentWaitTime = <number>waitTime;
+        }
         if (result) {
             return result
         }
@@ -89,12 +104,15 @@ const waitUntil = (subject: any, checkFunction: any, originalOptions = {}) => {
             const msg =
                 options.errorMsg instanceof Function ? options.errorMsg(result, options) : options.errorMsg;
             if (options.postFailure && options.postFailure instanceof Function) options.postFailure();
-            throw new Error(msg)
+            if (!options.ignoreTimeoutError)
+                throw new Error(msg)
         }
-        cy.wait(options.interval, { log: false }).then(() => {
-            retries--
-            return resolveValue()
-        })
+        if (currentWaitTime) {
+            cy.wait(currentWaitTime, { log: false }).then(() => {
+                retries--;
+                return resolveValue();
+            });
+        }
     }
 
     const resolveValue = () => {
@@ -110,92 +128,8 @@ const waitUntil = (subject: any, checkFunction: any, originalOptions = {}) => {
 
     return resolveValue()
 }
-const polling = (subject: any, checkFunction: any, originalOptions = {}) => {
-    if (!(checkFunction instanceof Function)) {
-        throw new Error("`checkFunction` parameter should be a function. Found: " + checkFunction);
-    }
-
-    const defaultOptions = {
-        // base options
-        time: 1000,
-        retries: 10,
-        errorMsg: <any>"Retried too many times.",
-        // log options
-        description: "polling",
-        log: true,
-        customMessage: undefined,
-        logger: Cypress.log,
-        verbose: false,
-        customCheckMessage: undefined,
-        postTimeout: <any>undefined
-    };
-    const options = { ...defaultOptions, ...originalOptions };
-
-    // filter out a falsy passed "customMessage" value
-    options.customMessage = <any>[options.customMessage, originalOptions].filter(Boolean);
-
-    let wt: number | undefined;
-    let waitTime: number | number[] = 0;
-    if (Array.isArray(options.time)) {
-        waitTime = options.time.reverse();
-    } else {
-        waitTime = options.time;
-    }
-    if (Array.isArray(options.time)) {
-        if (options.time.length > 1) {
-            wt = (<number[]>waitTime).pop();
-        } else {
-            wt = waitTime[0];
-        }
-    } else {
-        wt = <number>waitTime;
-    }
-
-    logCommand({ options, originalOptions });
-
-    const check = (result) => {
-        logCommandCheck({ result, options, originalOptions });
-        if (Array.isArray(options.time)) {
-            if (options.time.length > 1) {
-                wt = (<number[]>waitTime).pop();
-            } else {
-                wt = waitTime[0];
-            }
-        } else {
-            wt = <number>waitTime;
-        }
-        if (result) {
-            return result;
-        }
-        if (options.retries < 1) {
-            const msg =
-                <any>options.errorMsg instanceof Function ? options.errorMsg(result, options) : options.errorMsg;
-            if (options.postTimeout) options.postTimeout();
-            throw new Error(msg);
-        }
-        if (wt) {
-            cy.wait(wt, { log: false }).then(() => {
-                options.retries--;
-                return resolveValue();
-            });
-        }
-    };
-
-    const resolveValue = () => {
-        const result = checkFunction(subject);
-        const isAPromise = Boolean(result && result.then);
-        if (isAPromise) {
-            return result.then(check);
-        } else {
-            return check(result);
-        }
-    };
-
-    return resolveValue();
-};
 
 Cypress.Commands.add("polling", { prevSubject: "optional" }, polling);
-Cypress.Commands.add('waitUntil', { prevSubject: 'optional' }, waitUntil);
 
 Cypress.Commands.add("getByDataCy", (selector: string, options?: any) => {
     return cy.get(`[data-cy="${selector}"]`, options);
