@@ -389,16 +389,16 @@ Cypress.Commands.add("clearSessionAndCookies", () => {
     });
 });
 
-Cypress.Commands.add("getAttributeByValue", (attrName: string, attrValue: string, options?: any) => {
+Cypress.Commands.add("getByAttribute", (attrName: string, attrValue: string, options?: any) => {
     return cy.get(`[${attrName}="${attrValue}"]`, options);
 });
-Cypress.Commands.add("getAttributeByValueStartsWith", (attrName: string, attrValue: string, options?: any) => {
+Cypress.Commands.add("getByAttributeStartsWith", (attrName: string, attrValue: string, options?: any) => {
     return cy.get(`[${attrName}^="${attrValue}"]`, options);
 });
-Cypress.Commands.add("getAttributeByValueEndsWith", (attrName: string, attrValue: string, options?: any) => {
+Cypress.Commands.add("getByAttributeEndsWith", (attrName: string, attrValue: string, options?: any) => {
     return cy.get(`[${attrName}$="${attrValue}"]`, options);
 });
-Cypress.Commands.add("getAttributeByValueContains", (attrName: string, attrValue: string, options?: any) => {
+Cypress.Commands.add("getByAttributeContains", (attrName: string, attrValue: string, options?: any) => {
     return cy.get(`[${attrName}*="${attrValue}"]`, options);
 });
 

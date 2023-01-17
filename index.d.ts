@@ -33,10 +33,10 @@ declare module Cypress {
         getByClassStartsWith<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
         getByClassEndsWith<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
 
-        getAttributeByValue<E extends Node = HTMLElement>(attrName: string, attrValue: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
-        getAttributeByValueContains<E extends Node = HTMLElement>(attrName: string, attrValue: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
-        getAttributeByValueStartsWith<E extends Node = HTMLElement>(attrName: string, attrValue: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
-        getAttributeByValueEndsWith<E extends Node = HTMLElement>(attrName: string, attrValue: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+        getByAttribute<E extends Node = HTMLElement>(attrName: string, attrValue: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+        getByAttributeContains<E extends Node = HTMLElement>(attrName: string, attrValue: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+        getByAttributeStartsWith<E extends Node = HTMLElement>(attrName: string, attrValue: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+        getByAttributeEndsWith<E extends Node = HTMLElement>(attrName: string, attrValue: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
 
         getByRole<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
         getByName<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
