@@ -1,5 +1,3 @@
-/// <reference types="cypress" />
-
 function logCommand({ options, originalOptions }) {
     if (options.log) {
         options.logger({
@@ -161,7 +159,7 @@ Cypress.Commands.add("getByDataCyAdv", (selector: string, moreSelectors: string,
     return cy.get(`[data-cy="${selector}"] ${moreSelectors}`.trim(), options);
 });
 
-Cypress.Commands.add("promise", <T>(promise: Promise<T>) => {
+Cypress.Commands.add("await", <T>(promise: Promise<T>) => {
     return cy.then(() => promise);
 });
 

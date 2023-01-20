@@ -15,7 +15,7 @@ declare module Cypress {
         getByData<E extends Node = HTMLElement>(dataName: string, selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
         getByDataAdv<E extends Node = HTMLElement>(dataName: string, selector: string, moreSelectors: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
 
-        promise<T>(promise: Promise<T>): Chainable<T>;
+        await<T>(promise: Promise<T>): Chainable<T>;
 
         waitForUrlToChange(currentUrl: string, timeout: number): Chainable<string>;
 

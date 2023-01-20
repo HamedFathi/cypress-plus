@@ -1,6 +1,6 @@
 {
     "name": "cypress-plus",
-    "version": "0.0.10",
+    "version": "0.0.11",
     "description": "A bunch of useful Cypress commands with full TypeScript support.",
     "scripts": {
         "build": "rimraf dist && tsc && tsc --build tsconfig.commonjs.json"
@@ -22,9 +22,9 @@
         "type": "git",
         "url": "https://github.com/HamedFathi/cypress-plus"
     },
-    "source": "commands.ts",
-    "main": "dist/commonjs/commands.js",
-    "module": "dist/esm/commands.js",
+    "source": "index.ts",
+    "main": "dist/commonjs/index.js",
+    "module": "dist/esm/index.js",
     "types": "index.d.ts",
     "typings": "index.d.ts",
     "engines": {

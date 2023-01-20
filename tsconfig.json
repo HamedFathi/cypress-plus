@@ -16,6 +16,6 @@
       "forceConsistentCasingInFileNames": true
     },
     "exclude": ["node_modules", "dist"],
-    "include": ["commands.ts", "index.d.ts"]
+    "include": ["index.ts", "index.d.ts"]
   }
   
