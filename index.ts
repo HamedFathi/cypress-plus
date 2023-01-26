@@ -1,3 +1,5 @@
+/// <reference types="cypress" />
+
 function logCommand({ options, originalOptions }) {
   if (options.log) {
     options.logger({
@@ -125,6 +127,40 @@ function polling(subject: any, checkFunction: any, originalOptions = {}) {
 
 Cypress.Commands.add("polling", { prevSubject: "optional" }, polling);
 
+Cypress.Commands.add("clickOnDataCy", (selector: string, options?: any) => {
+  return cy.get(`[data-cy="${selector}"]`, options).click(options);
+});
+
+Cypress.Commands.add(
+  "waitForUrlAndVisibleDataCy",
+  (url: string, selector: string, timeout?: number) => {
+    if (url && selector) {
+      cy.visit(url as string, { timeout: timeout || 5000 });
+      return cy
+        .get(`[data-cy="${selector}"]`, { timeout: timeout || 5000 })
+        .should("be.visible");
+    }
+  }
+);
+Cypress.Commands.add(
+  "waitForUrlAndVisible",
+  (url: string, selector: string, timeout?: number) => {
+    if (url && selector) {
+      cy.visit(url as string, { timeout: timeout || 5000 });
+      return cy
+        .get(selector, { timeout: timeout || 5000 })
+        .should("be.visible");
+    }
+  }
+);
+
+Cypress.Commands.add(
+  "rightClickOnDataCy",
+  (selector: string, options?: any) => {
+    return cy.get(`[data-cy="${selector}"]`, options).rightclick(options);
+  }
+);
+
 Cypress.Commands.add("getByDataCy", (selector: string, options?: any) => {
   return cy.get(`[data-cy="${selector}"]`, options);
 });
@@ -202,28 +238,14 @@ Cypress.Commands.add(
   }
 );
 
-Cypress.Commands.add(
-  "clickOnDataCy",
-  (selector: string, options?: any, clickOptions?: any) => {
-    return cy.get(`[data-cy="${selector}"]`, options).click(clickOptions);
-  }
-);
-
-Cypress.Commands.add(
-  "rightClickOnDataCy",
-  (selector: string, options?: any, clickOptions?: any) => {
-    return cy.get(`[data-cy="${selector}"]`, options).rightclick(clickOptions);
-  }
-);
-
 Cypress.Commands.add("await", <T>(promise: Promise<T>) => {
   return cy.then(() => promise);
 });
 
 Cypress.Commands.add(
   "waitForUrlToChange",
-  (currentUrl: string, timeout: number) => {
-    if (timeout <= 0) timeout = 0;
+  (currentUrl: string, timeout?: number) => {
+    if (!timeout || timeout <= 0) timeout = 5000;
     cy.wait(timeout);
     return cy.url().should("not.eq", currentUrl);
   }
@@ -283,24 +305,24 @@ Cypress.Commands.add("getByValue", (value: string, options?: any) => {
   return cy.get(`[value="${value}"]`, options);
 });
 
-Cypress.Commands.add("waitAndClick", (selector: string, timeout: number) => {
-  if (timeout <= 0) timeout = 0;
+Cypress.Commands.add("waitAndClick", (selector: string, timeout?: number) => {
+  if (!timeout || timeout <= 0) timeout = 5000;
   return cy.get(selector, { timeout: timeout }).click();
 });
 
-Cypress.Commands.add("getByText", (text: string, timeout: number) => {
+Cypress.Commands.add("getByText", (text: string, timeout?: number) => {
   return cy.contains(text, {
     matchCase: false,
     includeShadowDom: true,
-    timeout: timeout,
+    timeout: timeout || 5000,
   });
 });
 
-Cypress.Commands.add("getByExactText", (text: string, timeout: number) => {
+Cypress.Commands.add("getByExactText", (text: string, timeout?: number) => {
   return cy.contains(text, {
     matchCase: true,
     includeShadowDom: true,
-    timeout: timeout,
+    timeout: timeout || 5000,
   });
 });
 
@@ -321,15 +343,44 @@ Cypress.Commands.add(
   }
 );
 Cypress.Commands.add(
+  "clearAndTypeByDataCy",
+  (
+    selector: string,
+    text: string,
+    pressEnter: boolean = false,
+    options?: any
+  ) => {
+    if (pressEnter)
+      return cy
+        .get(`[data-cy="${selector}"]`, options)
+        .clear()
+        .type(text + "{enter}");
+    return cy.get(`[data-cy="${selector}"]`, options).clear().type(text);
+  }
+);
+Cypress.Commands.add(
+  "typeByDataCy",
+  (
+    selector: string,
+    text: string,
+    pressEnter: boolean = false,
+    options?: any
+  ) => {
+    if (pressEnter)
+      return cy.get(`[data-cy="${selector}"]`, options).type(text + "{enter}");
+    return cy.get(`[data-cy="${selector}"]`, options).type(text);
+  }
+);
+Cypress.Commands.add(
   "waitForClearAndType",
   (
     selector: string,
     text: string,
-    timeout: number,
+    timeout?: number,
     pressEnter: boolean = false,
     options?: any
   ) => {
-    if (timeout <= 0) timeout = 0;
+    if (!timeout || timeout <= 0) timeout = 5000;
     cy.wait(timeout);
     if (pressEnter)
       return cy
@@ -337,6 +388,25 @@ Cypress.Commands.add(
         .clear()
         .type(text + "{enter}");
     return cy.get(selector, options).clear().type(text);
+  }
+);
+Cypress.Commands.add(
+  "waitForClearAndTypeByDataCy",
+  (
+    selector: string,
+    text: string,
+    timeout?: number,
+    pressEnter: boolean = false,
+    options?: any
+  ) => {
+    if (!timeout || timeout <= 0) timeout = 5000;
+    cy.wait(timeout);
+    if (pressEnter)
+      return cy
+        .get(`[data-cy="${selector}"]`, options)
+        .clear()
+        .type(text + "{enter}");
+    return cy.get(`[data-cy="${selector}"]`, options).clear().type(text);
   }
 );
 Cypress.Commands.add(
@@ -349,21 +419,21 @@ Cypress.Commands.add(
 Cypress.Commands.add("hover", (selector: string, options?: any) => {
   return cy.get(selector, options).trigger("mouseover");
 });
-Cypress.Commands.add("waitForElement", (selector: string, timeout: number) => {
-  return cy.get(selector, { timeout: timeout });
+Cypress.Commands.add("waitForElement", (selector: string, timeout?: number) => {
+  return cy.get(selector, { timeout: timeout || 5000 });
 });
 Cypress.Commands.add(
   "waitForElementDataCy",
-  (selector: string, timeout: number) => {
-    return cy.get(`[data-cy="${selector}"]`, { timeout: timeout });
+  (selector: string, timeout?: number) => {
+    return cy.get(`[data-cy="${selector}"]`, { timeout: timeout || 5000 });
   }
 );
 Cypress.Commands.add(
   "waitForElementDataCyAdv",
-  (selector: string, moreSelectors: string, timeout: number) => {
+  (selector: string, moreSelectors: string, timeout?: number) => {
     moreSelectors = moreSelectors ?? "";
     return cy.get(`[data-cy="${selector}"] ${moreSelectors}`.trim(), {
-      timeout: timeout,
+      timeout: timeout || 5000,
     });
   }
 );
@@ -469,45 +539,62 @@ Cypress.Commands.add(
   }
 );
 
-Cypress.Commands.add("waitForInvisible", (selector: string, timeout) => {
-  if (timeout <= 0) timeout = 0;
-  return cy.get(selector, { timeout: timeout }).should("not.be.visible");
+Cypress.Commands.add(
+  "waitForInvisible",
+  (selector: string, timeout?: number) => {
+    if (!timeout || timeout <= 0) timeout = 5000;
+    return cy
+      .get(selector, { timeout: timeout || 5000 })
+      .should("not.be.visible");
+  }
+);
+Cypress.Commands.add("waitForVisible", (selector: string, timeout?: number) => {
+  if (!timeout || timeout <= 0) timeout = 5000;
+  return cy.get(selector, { timeout: timeout || 5000 }).should("be.visible");
 });
-Cypress.Commands.add("waitForVisible", (selector: string, timeout) => {
-  if (timeout <= 0) timeout = 0;
-  return cy.get(selector, { timeout: timeout }).should("be.visible");
-});
-Cypress.Commands.add("waitForInvisibleDataCy", (selector: string, timeout) => {
-  if (timeout <= 0) timeout = 0;
-  return cy
-    .get(`[data-cy="${selector}"]`, { timeout: timeout })
-    .should("not.be.visible");
-});
-Cypress.Commands.add("waitForVisibleDataCy", (selector: string, timeout) => {
-  if (timeout <= 0) timeout = 0;
-  return cy
-    .get(`[data-cy="${selector}"]`, { timeout: timeout })
-    .should("be.visible");
-});
+Cypress.Commands.add(
+  "waitForInvisibleDataCy",
+  (selector: string, timeout?: number) => {
+    if (!timeout || timeout <= 0) timeout = 5000;
+    return cy
+      .get(`[data-cy="${selector}"]`, { timeout: timeout || 5000 })
+      .should("not.be.visible");
+  }
+);
+Cypress.Commands.add(
+  "waitForVisibleDataCy",
+  (selector: string, timeout?: number) => {
+    if (!timeout || timeout <= 0) timeout = 5000;
+    return cy
+      .get(`[data-cy="${selector}"]`, { timeout: timeout || 5000 })
+      .should("be.visible");
+  }
+);
 
-Cypress.Commands.add("waitForExist", (selector: string, timeout) => {
-  if (timeout <= 0) timeout = 0;
-  return cy.get(selector, { timeout: timeout }).should("exist");
+Cypress.Commands.add("waitForExist", (selector: string, timeout?: number) => {
+  if (!timeout || timeout <= 0) timeout = 5000;
+  return cy.get(selector, { timeout: timeout || 5000 }).should("exist");
 });
-Cypress.Commands.add("waitForNotExist", (selector: string, timeout) => {
-  if (timeout <= 0) timeout = 0;
-  return cy.get(selector, { timeout: timeout }).should("not.exist");
-});
-Cypress.Commands.add("waitForExistDataCy", (selector: string, timeout) => {
-  if (timeout <= 0) timeout = 0;
-  return cy
-    .get(`[data-cy="${selector}"]`, { timeout: timeout })
-    .should("exist");
-});
+Cypress.Commands.add(
+  "waitForNotExist",
+  (selector: string, timeout?: number) => {
+    if (!timeout || timeout <= 0) timeout = 5000;
+    return cy.get(selector, { timeout: timeout || 5000 }).should("not.exist");
+  }
+);
+Cypress.Commands.add(
+  "waitForExistDataCy",
+  (selector: string, timeout?: number) => {
+    if (!timeout || timeout <= 0) timeout = 5000;
+    return cy
+      .get(`[data-cy="${selector}"]`, { timeout: timeout || 5000 })
+      .should("exist");
+  }
+);
 Cypress.Commands.add("waitForNotExistDataCy", (selector: string, timeout) => {
-  if (timeout <= 0) timeout = 0;
+  if (!timeout || timeout <= 0) timeout = 5000;
   return cy
-    .get(`[data-cy="${selector}"]`, { timeout: timeout })
+    .get(`[data-cy="${selector}"]`, { timeout: timeout || 5000 })
     .should("not.exist");
 });
 
