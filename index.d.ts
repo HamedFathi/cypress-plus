@@ -5,7 +5,7 @@ declare module Cypress {
         getByDataCyStartsWith<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
         getByDataCyEndsWith<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
 
-        getByDataCy<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+        getByDataCy<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow & Cypress.ActionableOptions>): Chainable<JQuery<E>>;
         getByDataCyAdv<E extends Node = HTMLElement>(selector: string, moreSelectors: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
 
         waitForUrlAndVisible(url: string, selector: string, timeout?: number): Chainable<JQuery<HTMLElement>>;
@@ -22,6 +22,7 @@ declare module Cypress {
         getByDataAdv<E extends Node = HTMLElement>(dataName: string, selector: string, moreSelectors: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
 
         await<T>(promise: Promise<T>): Chainable<T>;
+        justWrap(action: (...args: any[]) => any, options?: Partial<Loggable & Timeoutable>): Chainable<any>;
 
         waitForUrlToChange(currentUrl: string, timeout?: number): Chainable<string>;
 
@@ -50,10 +51,14 @@ declare module Cypress {
         waitAndClick(selector: string, timeout?: number): Chainable<JQuery<HTMLElement>>;
         getByText(selector: string, timeout?: number): Chainable<any>;
         getByExactText(selector: string, timeout?: number): Chainable<any>;
+        justType(selector: string, text: string, pressEnter?: boolean, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
         clearAndType(selector: string, text: string, pressEnter?: boolean, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
         waitForClearAndType(selector: string, text: string, timeout?: number, pressEnter?: boolean, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
         clearAndTypeByDataCy(selector: string, text: string, pressEnter?: boolean, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
         typeByDataCy(selector: string, text: string, pressEnter?: boolean, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+        waitForTypeByDataCy(selector: string, text: string, timeout?: number, pressEnter?: boolean, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+        waitForType(selector: string, text: string, timeout?: number, pressEnter?: boolean, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+
         waitForClearAndTypeByDataCy(selector: string, text: string, timeout?: number, pressEnter?: boolean, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
 
         getCount(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<number>;
