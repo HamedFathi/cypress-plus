@@ -185,7 +185,7 @@ Cypress.Commands.add("getByDataCyAdv", (selector: string, moreSelectors: string,
 Cypress.Commands.add("await", <T>(promise: Promise<T>) => {
     return cy.then(() => {
         return cy.wrap(null, { log: false }).then(() => {
-            return new Cypress.Promise(async (resolve, reject) => {
+            return new Cypress.Promise((resolve, reject) => {
                 try {
                     return promise.then(resolve);
                 } catch (error) {
