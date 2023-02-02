@@ -186,11 +186,9 @@ Cypress.Commands.add("await", <T>(promise: Promise<T>) => {
     return cy.then(() => {
         return cy.wrap(null, { log: false }).then(() => {
             return new Cypress.Promise((resolve, reject) => {
-                try {
-                    return promise.then(resolve);
-                } catch (error) {
+                return promise.then(resolve, reject).catch(error => {
                     return reject(error);
-                }
+                });
             });
         });
     });
