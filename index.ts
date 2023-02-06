@@ -182,9 +182,12 @@ Cypress.Commands.add("getByDataCyAdv", (selector: string, moreSelectors: string,
     return cy.get(`[data-cy="${selector}"] ${moreSelectors}`.trim(), options);
 });
 
-Cypress.Commands.add("await", <T>(promise: Promise<T>) => {
+Cypress.Commands.add("await", <T>(promise: Promise<T>, wait?: number) => {
     return cy.then(() => {
         return cy.wrap(null, { log: false }).then(() => {
+            if (wait && wait > 0) {
+                cy.wait(wait);
+            }
             return new Cypress.Promise((resolve, reject) => {
                 return promise.then(resolve, reject).catch(error => {
                     return reject(error);
@@ -194,15 +197,17 @@ Cypress.Commands.add("await", <T>(promise: Promise<T>) => {
     });
 });
 
-Cypress.Commands.add("justWrap", (action: (...args: any[]) => any, options?: any) => {
+Cypress.Commands.add("justWrap", (action: (...args: any[]) => any, wait?: number, options?: any) => {
     if (!options) {
         options = { log: false };
     };
     return cy.wrap(null, options).then(() => {
+        if (wait && wait > 0) {
+            cy.wait(wait);
+        }
         return action();
     });
 });
-
 
 Cypress.Commands.add("waitForUrlToChange", (currentUrl: string, timeout?: number) => {
     if (!timeout || timeout <= 0)
