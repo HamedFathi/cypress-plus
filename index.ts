@@ -95,6 +95,7 @@ function polling(subject: any, checkFunction: any, originalOptions = {}) {
                 options.postFailureAction()
             if (!options.ignoreTimeoutError)
                 throw new Error(msg)
+            return
         }
         if (currentWaitTime) {
             cy.wait(currentWaitTime, { log: false }).then(() => {
