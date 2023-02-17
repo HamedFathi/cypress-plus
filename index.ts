@@ -95,7 +95,7 @@ function polling(subject: any, checkFunction: any, originalOptions = {}) {
                 options.postFailureAction()
             if (!options.ignoreTimeoutError)
                 throw new Error(msg)
-            return
+            return;
         }
         if (currentWaitTime) {
             cy.wait(currentWaitTime, { log: false }).then(() => {
@@ -213,8 +213,13 @@ Cypress.Commands.add("justWrap", (action: (...args: any[]) => any, wait?: number
 Cypress.Commands.add("waitForUrlToChange", (currentUrl: string, timeout?: number) => {
     if (!timeout || timeout <= 0)
         timeout = 5000;
-    cy.wait(timeout);
-    return cy.url().should("not.eq", currentUrl);
+    return cy.polling(() => {
+        cy.url().then(url => {
+            return url != currentUrl;
+        })
+    }, { mode: "timeout", timeout: timeout, interval: 100 }).then(() => {
+        return cy.url().should("not.eq", currentUrl);
+    });
 });
 
 Cypress.Commands.add("assertElementsCount", (selector: string, count: number, lengthComparison: "equal" | "above" | "below" | "atMost" | "atLeast", options?: any) => {
