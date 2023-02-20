@@ -1,6 +1,6 @@
 {
     "name": "cypress-plus",
-    "version": "0.0.20",
+    "version": "0.0.21",
     "description": "A bunch of useful Cypress commands with full TypeScript support.",
     "scripts": {
         "build": "rimraf dist && tsc && tsc --build tsconfig.commonjs.json"

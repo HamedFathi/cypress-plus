@@ -113,6 +113,20 @@ declare module Cypress {
         iterateChildren(selector: string, callback: (child: JQuery<HTMLElement>) => void, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
         iterateChildrenIf(selector: string, condition: (child: JQuery<HTMLElement>) => boolean, callback: (child: JQuery<HTMLElement>) => void, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
 
+        isEmpty(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+        isNotEmpty(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+        hasValue(selector: string, value: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+        doesNotHaveValue(selector: string, value: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+        hasClass(selector: string, value: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+        doesNotHaveClass(selector: string, value: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+        isVisible(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+        isNotVisible(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+        checkURL(url: string): Chainable<string>;
+        invokeText(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<string>;
+        invokeTextByDataCy(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<string>;
+        hasAttribute(selector: string, attribute: string, value: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+        doesNotHaveAttribute(selector: string, attribute: string, value: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+
         polling<ReturnType = any>(
             checkFunction: (subject: Subject | undefined) => ReturnType | Chainable<ReturnType> | Promise<ReturnType>,
             options?: PollingOptions<Subject>,

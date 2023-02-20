@@ -59,48 +59,48 @@ function polling(subject: any, checkFunction: any, originalOptions = {}) {
     let currentWaitTime: number | undefined
     let waitTime: number | number[] = 0
     if (Array.isArray(options.interval)) {
-        waitTime = options.interval.reverse()
+        waitTime = options.interval.reverse();
     } else {
-        waitTime = options.interval
+        waitTime = options.interval;
     }
     if (Array.isArray(options.interval)) {
         if (options.interval.length > 1) {
-            currentWaitTime = (<number[]>waitTime).pop()
+            currentWaitTime = (<number[]>waitTime).pop();
         } else {
-            currentWaitTime = waitTime[0]
+            currentWaitTime = waitTime[0];
         }
     } else {
-        currentWaitTime = <number>waitTime
+        currentWaitTime = <number>waitTime;
     }
 
-    logCommand({ options, originalOptions })
+    logCommand({ options, originalOptions });
 
     const check = (result: any) => {
         logCommandCheck({ result, options, originalOptions })
         if (Array.isArray(options.interval)) {
             if (options.interval.length > 1) {
-                currentWaitTime = (<number[]>waitTime).pop()
+                currentWaitTime = (<number[]>waitTime).pop();
             } else {
-                currentWaitTime = waitTime[0]
+                currentWaitTime = waitTime[0];
             }
         } else {
-            currentWaitTime = <number>waitTime
+            currentWaitTime = <number>waitTime;
         }
         if (result) {
-            return result
+            return result;
         }
         if (retries < 1) {
             const msg = options.errorMessage instanceof Function ? options.errorMessage(result, options) : options.errorMessage
             if (options.postFailureAction && options.postFailureAction instanceof Function)
-                options.postFailureAction()
-            if (!options.ignoreTimeoutError)
-                throw new Error(msg)
+                options.postFailureAction();
+            if (!options.ignoreTimeoutError && !options.postFailureAction)
+                throw new Error(msg);
             return;
         }
         if (currentWaitTime) {
             cy.wait(currentWaitTime, { log: false }).then(() => {
                 retries--
-                return resolveValue()
+                return resolveValue();
             })
         }
     }
@@ -553,3 +553,58 @@ Cypress.Commands.add("iterateChildrenIf", (selector: string, condition: (child: 
     });
 });
 
+Cypress.Commands.add("isEmpty", (selector: string, options?: any) => {
+    return cy.get(selector, options).should('be.empty');
+});
+
+Cypress.Commands.add("isNotEmpty", (selector: string, options?: any) => {
+    return cy.get(selector, options).should('not.be.empty');
+});
+
+Cypress.Commands.add("hasValue", (selector: string, value: string, options?: any) => {
+    return cy.get(selector, options).should('have.value', value);
+});
+
+Cypress.Commands.add("doesNotHaveValue", (selector: string, value: string, options?: any) => {
+    return cy.get(selector, options).should('have.value', value);
+});
+
+Cypress.Commands.add("hasClass", (selector: string, value: string, options?: any) => {
+    return cy.get(selector, options).should('have.class', value);
+});
+
+Cypress.Commands.add("doesNotHaveClass", (selector: string, value: string, options?: any) => {
+    return cy.get(selector, options).should('not.have.class', value)
+});
+
+Cypress.Commands.add("isVisible", (selector: string, options?: any) => {
+    return cy.get(selector, options).should('be.visible');
+});
+
+Cypress.Commands.add("isNotVisible", (selector: string, options?: any) => {
+    return cy.get(selector, options).should('not.be.visible');
+});
+
+Cypress.Commands.add("checkURL", (url: string) => {
+    return cy.url().should('include', url);
+});
+
+Cypress.Commands.add("invokeText", (selector: string, options?: any) => {
+    return cy.get(selector, options).invoke('text').then(value => {
+        return cy.wrap(value);
+    });
+});
+
+Cypress.Commands.add("invokeTextByDataCy", (selector: string, options?: any) => {
+    return cy.get(`[data-cy="${selector}"]`, options).invoke('text').then(value => {
+        return cy.wrap(value);
+    });
+});
+
+Cypress.Commands.add("hasAttribute", (selector: string, attribute: string, value: string, options?: any) => {
+    return cy.get(selector, options).should('have.attr', attribute, value)
+});
+
+Cypress.Commands.add("doesNotHaveAttribute", (selector: string, attribute: string, value: string, options?: any) => {
+    return cy.get(selector, options).should('not.have.attr', attribute, value)
+});
