@@ -1,5 +1,3 @@
-/// <reference types="cypress" />
-
 function logCommand({ options, originalOptions }) {
     if (options.log) {
         options.logger({
@@ -608,3 +606,279 @@ Cypress.Commands.add("hasAttribute", (selector: string, attribute: string, value
 Cypress.Commands.add("doesNotHaveAttribute", (selector: string, attribute: string, value: string, options?: any) => {
     return cy.get(selector, options).should('not.have.attr', attribute, value)
 });
+
+
+
+
+export abstract class Ability<T> {
+    public abstract can(): T;
+}
+
+export class UseCypress extends Ability<Cypress.cy & CyEventEmitter> {
+    public can(): Cypress.cy & CyEventEmitter {
+        return cy;
+    }
+}
+
+export abstract class Interaction {
+    public abstract attemptAs(actor: Actor): Cypress.Chainable<unknown>;
+}
+
+export abstract class TaskAuto {
+    constructor(private readonly interactions: Interaction[]) { }
+
+    public performAs(actor: Actor): void {
+        for (const interaction of this.interactions) {
+            interaction.attemptAs(actor);
+        }
+    }
+}
+
+export abstract class Task {
+    constructor(private readonly interactions: Interaction[]) { }
+
+    public getInteractions(): Interaction[] {
+        return this.interactions;
+    }
+
+    public attemptInteractionsAs(actor: Actor): void {
+        for (const interaction of this.getInteractions()) {
+            interaction.attemptAs(actor);
+        }
+    }
+
+    public attemptInteractionAs(actor: Actor,
+        interactionClass: new (...args: never[]) => Interaction
+    ): Cypress.Chainable<unknown> {
+        const matchingInteractions = this.interactions?.filter(
+            (a) => a instanceof interactionClass
+        ) as Interaction[];
+        if (matchingInteractions.length === 0) {
+            throw new Error(
+                `Interaction with name of '${interactionClass.name}' not found.`
+            );
+        }
+        return matchingInteractions[0].attemptAs(actor);
+    }
+
+    public abstract performAs(actor: Actor): Cypress.Chainable<void>;
+}
+
+export abstract class Question {
+    public abstract askAs(actor: Actor): Cypress.Chainable<unknown>;
+}
+
+export class Actor {
+    constructor(private readonly abilities?: Ability<unknown>[]) { }
+
+    public useAbility<T>(
+        abilityClass: new (...args: never[]) => Ability<T>
+    ): T {
+        const matchingAbilities = this.abilities?.filter(
+            (a) => a instanceof abilityClass
+        ) as Ability<T>[];
+        if (matchingAbilities.length === 0) {
+            throw new Error(
+                `Actor does not have ability with name of '${abilityClass.name}'.`
+            );
+        }
+        return matchingAbilities[0].can();
+    }
+
+    public async performs(
+        taskOrInteraction: Task | TaskAuto | Interaction | Interaction[]
+    ): Promise<void> {
+        if (taskOrInteraction instanceof Task) {
+            taskOrInteraction.performAs(this);
+            return;
+        }
+        if (taskOrInteraction instanceof TaskAuto) {
+            taskOrInteraction.performAs(this);
+            return;
+        }
+        if (taskOrInteraction instanceof Interaction) {
+            taskOrInteraction.attemptAs(this);
+            return;
+        }
+        if (Array.isArray(taskOrInteraction)) {
+            for (const interaction of taskOrInteraction) {
+                interaction.attemptAs(this);
+            }
+            return;
+        }
+    }
+
+    public asserts<T>(
+        question: Question,
+        assert: (answer: T) => void
+    ): void {
+        question.askAs(this).then((answer: unknown) => {
+            assert(answer as T);
+        });
+    } F
+
+    public asksAbout<T>(question: Question): Cypress.Chainable<T> {
+        return question.askAs(this) as Cypress.Chainable<T>;
+    }
+}
+
+
+export type PollingLog = Pick<Cypress.LogConfig, "name" | "message" | "consoleProps">;
+
+export type PollingErrorMsgCallback<Subject = any> = (result: Subject, options: PollingOptions<Subject>) => string;
+
+export interface PollingOptions<Subject = any> {
+    retries?: number;
+    timeout?: number;
+    interval: number | number[];
+    errorMessage?: string | PollingErrorMsgCallback<Subject>;
+    description?: string;
+    customLogMessage?: string;
+    verbose?: boolean;
+    customLogCheckMessage?: string;
+    logger?: (logOptions: PollingLog) => any;
+    log?: boolean;
+    mode: "timeout" | "retry",
+    ignoreTimeoutError?: boolean,
+    postFailureAction?: () => void,
+}
+
+// TypeScript declaration
+declare global {
+    namespace Cypress {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        interface Chainable<Subject = any> {
+
+            getByDataCyContains<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+            getByDataCyStartsWith<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+            getByDataCyEndsWith<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+
+            getByDataCy<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow & Cypress.ActionableOptions>): Chainable<JQuery<E>>;
+            getByDataCyAdv<E extends Node = HTMLElement>(selector: string, moreSelectors: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+
+            waitForUrlAndVisible(url: string, selector: string, timeout?: number): Chainable<JQuery<HTMLElement>>;
+            waitForUrlAndVisibleDataCy(url: string, selector: string, timeout?: number): Chainable<JQuery<HTMLElement>>;
+
+            clickOnDataCy(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+            rightClickOnDataCy(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+
+            getByDataContains<E extends Node = HTMLElement>(dataName: string, selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+            getByDataStartsWith<E extends Node = HTMLElement>(dataName: string, selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+            getByDataEndsWith<E extends Node = HTMLElement>(dataName: string, selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+
+            getByData<E extends Node = HTMLElement>(dataName: string, selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+            getByDataAdv<E extends Node = HTMLElement>(dataName: string, selector: string, moreSelectors: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+
+            await<T>(promise: Promise<T>, wait?: number): Chainable<T>;
+            justWrap(action: (...args: any[]) => any, wait?: number, options?: Partial<Loggable & Timeoutable>): Chainable<any>;
+
+            waitForUrlToChange(currentUrl: string, timeout?: number): Chainable<string>;
+
+            getByAriaDescribedBy<E extends Node = HTMLElement>(ariaLabel: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+            getByAriaControls<E extends Node = HTMLElement>(ariaLabel: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+            getByAriaCurrent<E extends Node = HTMLElement>(ariaLabel: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+
+            getByAriaLabel<E extends Node = HTMLElement>(ariaLabel: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+            getByTitle<E extends Node = HTMLElement>(title: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+            getByAlt<E extends Node = HTMLElement>(alt: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+            getByPlaceholder<E extends Node = HTMLElement>(placeholder: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+            getByValue<E extends Node = HTMLElement>(value: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+            getByClass<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+            getByClassContains<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+            getByClassStartsWith<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+            getByClassEndsWith<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+
+            getByAttribute<E extends Node = HTMLElement>(attrName: string, attrValue: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+            getByAttributeContains<E extends Node = HTMLElement>(attrName: string, attrValue: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+            getByAttributeStartsWith<E extends Node = HTMLElement>(attrName: string, attrValue: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+            getByAttributeEndsWith<E extends Node = HTMLElement>(attrName: string, attrValue: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+
+            getByRole<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+            getByName<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+
+            waitAndClick(selector: string, timeout?: number): Chainable<JQuery<HTMLElement>>;
+            getByText(selector: string, timeout?: number): Chainable<any>;
+            getByExactText(selector: string, timeout?: number): Chainable<any>;
+            justType(selector: string, text: string, pressEnter?: boolean, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+            clearAndType(selector: string, text: string, pressEnter?: boolean, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+            waitForClearAndType(selector: string, text: string, timeout?: number, pressEnter?: boolean, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+            clearAndTypeByDataCy(selector: string, text: string, pressEnter?: boolean, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+            typeByDataCy(selector: string, text: string, pressEnter?: boolean, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+            waitForTypeByDataCy(selector: string, text: string, timeout?: number, pressEnter?: boolean, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+            waitForType(selector: string, text: string, timeout?: number, pressEnter?: boolean, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+
+            waitForClearAndTypeByDataCy(selector: string, text: string, timeout?: number, pressEnter?: boolean, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+
+            getCount(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<number>;
+
+            clearSessionAndCookies(): Chainable<Cypress.AUTWindow>;
+            goBack(): Chainable<Cypress.AUTWindow>;
+            goForward(): Chainable<Cypress.AUTWindow>;
+            navigateTo(route: string): Chainable<Cypress.AUTWindow>;
+
+            assertElementsCount(selector: string, count: number, lengthComparison: "equal" | "above" | "below" | "atMost" | "atLeast", options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+
+            getInputValue(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<string | number | string[] | undefined>;
+
+            getParent<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+            getSibling<E extends Node = HTMLElement>(selector: string, nth: number, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+            getNthChild<E extends Node = HTMLElement>(selector: string, nth: number, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+            getFirst(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+            getLast<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+            getFirstNth<E extends Node = HTMLElement>(selector: string, nth: number, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+            getLastNth<E extends Node = HTMLElement>(selector: string, nth: number, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+
+            checkCheckbox(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+            uncheckCheckbox(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+            clickButton(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+            clickLink(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+            getByHref<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
+
+            waitForNotExistDataCy(selector: string, timeout?: number): Chainable<JQuery<HTMLElement>>;
+            waitForNotExist(selector: string, timeout?: number): Chainable<JQuery<HTMLElement>>;
+            waitForExistDataCy(selector: string, timeout?: number): Chainable<JQuery<HTMLElement>>;
+            waitForExist(selector: string, timeout?: number): Chainable<JQuery<HTMLElement>>;
+            waitForInvisibleDataCy(selector: string, timeout?: number): Chainable<JQuery<HTMLElement>>;
+            waitForInvisible(selector: string, timeout?: number): Chainable<JQuery<HTMLElement>>;
+            waitForVisibleDataCy(selector: string, timeout?: number): Chainable<JQuery<HTMLElement>>;
+            waitForVisible(selector: string, timeout?: number): Chainable<JQuery<HTMLElement>>;
+            waitForElement<E extends Node = HTMLElement>(selector: string, timeout?: number): Chainable<JQuery<E>>;
+            waitForElementDataCy<E extends Node = HTMLElement>(selector: string, timeout?: number): Chainable<JQuery<E>>;
+            waitForElementDataCyAdv<E extends Node = HTMLElement>(selector: string, moreSelectors: string, timeout?: number): Chainable<JQuery<E>>;
+
+            selectFromDropdown(selector: string, value: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+            hover(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+
+            getAttribute(selector: string, attribute: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<string | undefined>;
+            getAttributeDataCy(selector: string, attribute: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<string | undefined>;
+            getAttributeDataCyAdv(selector: string, attribute: string, moreSelectors: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<string | undefined>;
+
+            getParentIf(selector: string, condition: (parent: JQuery<HTMLElement>) => boolean, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+            getChildIf(selector: string, condition: (child: JQuery<HTMLElement>) => boolean, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+            getParentsIf(selector: string, condition: (parent: JQuery<HTMLElement>) => boolean, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>[]>;
+            getChildrenIf(selector: string, condition: (child: JQuery<HTMLElement>) => boolean, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>[]>;
+
+            iterateChildren(selector: string, callback: (child: JQuery<HTMLElement>) => void, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+            iterateChildrenIf(selector: string, condition: (child: JQuery<HTMLElement>) => boolean, callback: (child: JQuery<HTMLElement>) => void, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+
+            isEmpty(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+            isNotEmpty(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+            hasValue(selector: string, value: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+            doesNotHaveValue(selector: string, value: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+            hasClass(selector: string, value: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+            doesNotHaveClass(selector: string, value: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+            isVisible(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+            isNotVisible(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+            checkURL(url: string): Chainable<string>;
+            invokeText(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<string>;
+            invokeTextByDataCy(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<string>;
+            hasAttribute(selector: string, attribute: string, value: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+            doesNotHaveAttribute(selector: string, attribute: string, value: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+
+            polling<ReturnType = any>(
+                checkFunction: (subject: Subject | undefined) => ReturnType | Chainable<ReturnType> | Promise<ReturnType>,
+                options?: PollingOptions<Subject>,
+            ): Chainable<Subject>;
+        }
+    }
+}

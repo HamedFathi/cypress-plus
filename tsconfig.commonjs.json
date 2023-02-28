@@ -7,7 +7,7 @@
     "target": "ES2015",
     "lib": ["ESNext", "DOM"],
     "types": ["cypress", "node"],
-    "declaration": false,
+    "declaration": true,
     "sourceMap": true,
     "strict": true,
     "noImplicitAny": false,
