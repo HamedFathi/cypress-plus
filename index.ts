@@ -607,9 +607,6 @@ Cypress.Commands.add("doesNotHaveAttribute", (selector: string, attribute: strin
     return cy.get(selector, options).should('not.have.attr', attribute, value)
 });
 
-
-
-
 export abstract class Ability<T> {
     public abstract can(): T;
 }
@@ -622,16 +619,6 @@ export class UseCypress extends Ability<Cypress.cy & CyEventEmitter> {
 
 export abstract class Interaction {
     public abstract attemptAs(actor: Actor): Cypress.Chainable<unknown>;
-}
-
-export abstract class TaskAuto {
-    constructor(private readonly interactions: Interaction[]) { }
-
-    public performAs(actor: Actor): void {
-        for (const interaction of this.interactions) {
-            interaction.attemptAs(actor);
-        }
-    }
 }
 
 export abstract class Task {
@@ -661,7 +648,7 @@ export abstract class Task {
         return matchingInteractions[0].attemptAs(actor);
     }
 
-    public abstract performAs(actor: Actor): Cypress.Chainable<void>;
+    public abstract performAs(actor: Actor): Cypress.Chainable<unknown>;
 }
 
 export abstract class Question {
@@ -685,24 +672,32 @@ export class Actor {
         return matchingAbilities[0].can();
     }
 
-    public async performs(
-        taskOrInteraction: Task | TaskAuto | Interaction | Interaction[]
-    ): Promise<void> {
+    public performs(
+        taskOrInteraction: Task | Task[] | Interaction | Interaction[]
+    ): Cypress.Chainable<unknown> | undefined {
         if (taskOrInteraction instanceof Task) {
-            taskOrInteraction.performAs(this);
-            return;
-        }
-        if (taskOrInteraction instanceof TaskAuto) {
-            taskOrInteraction.performAs(this);
-            return;
+            return taskOrInteraction.performAs(this);
         }
         if (taskOrInteraction instanceof Interaction) {
-            taskOrInteraction.attemptAs(this);
+            return taskOrInteraction.attemptAs(this);
+        }
+        if (
+            Array.isArray(taskOrInteraction) &&
+            taskOrInteraction.length > 0 &&
+            taskOrInteraction[0] instanceof Task
+        ) {
+            for (const interaction of taskOrInteraction) {
+                (interaction as Task).performAs(this);
+            }
             return;
         }
-        if (Array.isArray(taskOrInteraction)) {
+        if (
+            Array.isArray(taskOrInteraction) &&
+            taskOrInteraction.length > 0 &&
+            taskOrInteraction[0] instanceof Interaction
+        ) {
             for (const interaction of taskOrInteraction) {
-                interaction.attemptAs(this);
+                (interaction as Interaction).attemptAs(this);
             }
             return;
         }
@@ -715,18 +710,16 @@ export class Actor {
         question.askAs(this).then((answer: unknown) => {
             assert(answer as T);
         });
-    } F
+    }
 
     public asksAbout<T>(question: Question): Cypress.Chainable<T> {
         return question.askAs(this) as Cypress.Chainable<T>;
     }
 }
 
-
 export type PollingLog = Pick<Cypress.LogConfig, "name" | "message" | "consoleProps">;
 
 export type PollingErrorMsgCallback<Subject = any> = (result: Subject, options: PollingOptions<Subject>) => string;
-
 export interface PollingOptions<Subject = any> {
     retries?: number;
     timeout?: number;
