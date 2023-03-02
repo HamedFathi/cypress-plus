@@ -196,6 +196,21 @@ Cypress.Commands.add("await", <T>(promise: Promise<T>, wait?: number) => {
     });
 });
 
+Cypress.Commands.add("awaitFor", (promise: Promise<unknown>, wait?: number) => {
+    return cy.then(() => {
+        return cy.wrap(null, { log: false }).then(() => {
+            if (wait && wait > 0) {
+                cy.wait(wait);
+            }
+            return new Cypress.Promise((resolve, reject) => {
+                return promise.then(resolve, reject).catch(error => {
+                    return reject(error);
+                });
+            });
+        });
+    });
+});
+
 Cypress.Commands.add("justWrap", (action: (...args: any[]) => any, wait?: number, options?: any) => {
     if (!options) {
         options = { log: false };
@@ -763,6 +778,7 @@ declare global {
             getByDataAdv<E extends Node = HTMLElement>(dataName: string, selector: string, moreSelectors: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
 
             await<T>(promise: Promise<T>, wait?: number): Chainable<T>;
+            awaitFor(promise: Promise<unknown>, wait?: number): Chainable<unknown>;
             justWrap(action: (...args: any[]) => any, wait?: number, options?: Partial<Loggable & Timeoutable>): Chainable<any>;
 
             waitForUrlToChange(currentUrl: string, timeout?: number): Chainable<string>;
