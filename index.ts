@@ -188,9 +188,7 @@ Cypress.Commands.add("await", <T>(promise: Promise<T>, wait?: number) => {
                 cy.wait(wait);
             }
             return new Cypress.Promise((resolve, reject) => {
-                return promise.then(resolve, reject).catch(error => {
-                    return reject(error);
-                });
+                return promise.then(resolve, reject);
             });
         });
     });
@@ -203,9 +201,33 @@ Cypress.Commands.add("awaitFor", (promise: Promise<unknown>, wait?: number) => {
                 cy.wait(wait);
             }
             return new Cypress.Promise((resolve, reject) => {
-                return promise.then(resolve, reject).catch(error => {
-                    return reject(error);
-                });
+                return promise.then(resolve, reject);
+            });
+        });
+    });
+});
+
+Cypress.Commands.add("awaitSilent", <T>(promise: Promise<T>, wait?: number) => {
+    return cy.then(() => {
+        return cy.wrap(null, { log: false }).then(() => {
+            if (wait && wait > 0) {
+                cy.wait(wait);
+            }
+            return new Cypress.Promise((resolve, reject) => {
+                return promise.catch(resolve).then(resolve, reject);
+            });
+        });
+    });
+});
+
+Cypress.Commands.add("awaitSilentFor", (promise: Promise<unknown>, wait?: number) => {
+    return cy.then(() => {
+        return cy.wrap(null, { log: false }).then(() => {
+            if (wait && wait > 0) {
+                cy.wait(wait);
+            }
+            return new Cypress.Promise((resolve, reject) => {
+                return promise.catch(resolve).then(resolve, reject);
             });
         });
     });
@@ -779,6 +801,9 @@ declare global {
 
             await<T>(promise: Promise<T>, wait?: number): Chainable<T>;
             awaitFor(promise: Promise<unknown>, wait?: number): Chainable<unknown>;
+            awaitSilent<T>(promise: Promise<T>, wait?: number): Chainable<T>;
+            awaitSilentFor(promise: Promise<unknown>, wait?: number): Chainable<unknown>;
+
             justWrap(action: (...args: any[]) => any, wait?: number, options?: Partial<Loggable & Timeoutable>): Chainable<any>;
 
             waitForUrlToChange(currentUrl: string, timeout?: number): Chainable<string>;
