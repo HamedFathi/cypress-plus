@@ -207,7 +207,7 @@ Cypress.Commands.add("awaitFor", (promise: Promise<unknown>, wait?: number) => {
     });
 });
 
-Cypress.Commands.add("awaitSilent", <T>(promise: Promise<T>, wait?: number) => {
+Cypress.Commands.add("awaitSilently", <T>(promise: Promise<T>, wait?: number) => {
     return cy.then(() => {
         return cy.wrap(null, { log: false }).then(() => {
             if (wait && wait > 0) {
@@ -220,7 +220,7 @@ Cypress.Commands.add("awaitSilent", <T>(promise: Promise<T>, wait?: number) => {
     });
 });
 
-Cypress.Commands.add("awaitSilentFor", (promise: Promise<unknown>, wait?: number) => {
+Cypress.Commands.add("awaitSilentlyFor", (promise: Promise<unknown>, wait?: number) => {
     return cy.then(() => {
         return cy.wrap(null, { log: false }).then(() => {
             if (wait && wait > 0) {
@@ -801,8 +801,8 @@ declare global {
 
             await<T>(promise: Promise<T>, wait?: number): Chainable<T>;
             awaitFor(promise: Promise<unknown>, wait?: number): Chainable<unknown>;
-            awaitSilent<T>(promise: Promise<T>, wait?: number): Chainable<T>;
-            awaitSilentFor(promise: Promise<unknown>, wait?: number): Chainable<unknown>;
+            awaitSilently<T>(promise: Promise<T>, wait?: number): Chainable<T>;
+            awaitSilentlyFor(promise: Promise<unknown>, wait?: number): Chainable<unknown>;
 
             justWrap(action: (...args: any[]) => any, wait?: number, options?: Partial<Loggable & Timeoutable>): Chainable<any>;
 
