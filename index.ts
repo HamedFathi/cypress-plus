@@ -181,7 +181,7 @@ Cypress.Commands.add("getByDataCyAdv", (selector: string, moreSelectors: string,
     return cy.get(`[data-cy="${selector}"] ${moreSelectors}`.trim(), options);
 });
 
-Cypress.Commands.add("await", <T>(promise: Promise<T>, wait?: number) => {
+Cypress.Commands.add("await", <T>(promise: Promise<T>, wait?: number, throwException = false) => {
     return cy.then(() => {
         return cy.wrap(null, { log: false }).then(() => {
             if (wait && wait > 0) {
@@ -194,41 +194,22 @@ Cypress.Commands.add("await", <T>(promise: Promise<T>, wait?: number) => {
     });
 });
 
-Cypress.Commands.add("awaitFor", (promise: Promise<unknown>, wait?: number) => {
+Cypress.Commands.add("awaitFor", (promise: Promise<unknown>, wait?: number, throwException = false) => {
     return cy.then(() => {
         return cy.wrap(null, { log: false }).then(() => {
             if (wait && wait > 0) {
                 cy.wait(wait);
             }
-            return new Cypress.Promise((resolve, reject) => {
-                return promise.then(resolve, reject);
-            });
-        });
-    });
-});
-
-Cypress.Commands.add("awaitSilently", <T>(promise: Promise<T>, wait?: number) => {
-    return cy.then(() => {
-        return cy.wrap(null, { log: false }).then(() => {
-            if (wait && wait > 0) {
-                cy.wait(wait);
+            if (throwException) {
+                return new Cypress.Promise((resolve, reject) => {
+                    return promise.then(resolve, reject);
+                });
             }
-            return new Cypress.Promise((resolve, reject) => {
-                return promise.catch(resolve).then(resolve, reject);
-            });
-        });
-    });
-});
-
-Cypress.Commands.add("awaitSilentlyFor", (promise: Promise<unknown>, wait?: number) => {
-    return cy.then(() => {
-        return cy.wrap(null, { log: false }).then(() => {
-            if (wait && wait > 0) {
-                cy.wait(wait);
+            else {
+                return new Cypress.Promise((resolve, reject) => {
+                    return promise.catch(resolve).then(resolve, reject);
+                });
             }
-            return new Cypress.Promise((resolve, reject) => {
-                return promise.catch(resolve).then(resolve, reject);
-            });
         });
     });
 });
@@ -799,10 +780,8 @@ declare global {
             getByData<E extends Node = HTMLElement>(dataName: string, selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
             getByDataAdv<E extends Node = HTMLElement>(dataName: string, selector: string, moreSelectors: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
 
-            await<T>(promise: Promise<T>, wait?: number): Chainable<T>;
-            awaitFor(promise: Promise<unknown>, wait?: number): Chainable<unknown>;
-            awaitSilently<T>(promise: Promise<T>, wait?: number): Chainable<T>;
-            awaitSilentlyFor(promise: Promise<unknown>, wait?: number): Chainable<unknown>;
+            await<T>(promise: Promise<T>, wait?: number, throwException?: boolean): Chainable<T>;
+            awaitFor(promise: Promise<unknown>, wait?: number, throwException?: boolean): Chainable<unknown>;
 
             justWrap(action: (...args: any[]) => any, wait?: number, options?: Partial<Loggable & Timeoutable>): Chainable<any>;
 
