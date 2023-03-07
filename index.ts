@@ -187,9 +187,16 @@ Cypress.Commands.add("await", <T>(promise: Promise<T>, wait?: number, throwExcep
             if (wait && wait > 0) {
                 cy.wait(wait);
             }
-            return new Cypress.Promise((resolve, reject) => {
-                return promise.then(resolve, reject);
-            });
+            if (throwException) {
+                return new Cypress.Promise((resolve, reject) => {
+                    return promise.then(resolve, reject);
+                });
+            }
+            else {
+                return new Cypress.Promise((resolve, reject) => {
+                    return promise.catch(resolve).then(resolve, reject);
+                });
+            }
         });
     });
 });
