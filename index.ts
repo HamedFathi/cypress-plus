@@ -181,7 +181,7 @@ Cypress.Commands.add("getByDataCyAdv", (selector: string, moreSelectors: string,
     return cy.get(`[data-cy="${selector}"] ${moreSelectors}`.trim(), options);
 });
 
-Cypress.Commands.add("await", <T>(promise: Promise<T>, wait?: number, throwException = false) => {
+Cypress.Commands.add("await", <T>(promise: Promise<T>, throwException?: boolean, wait?: number) => {
     return cy.then(() => {
         return cy.wrap(null, { log: false }).then(() => {
             if (wait && wait > 0) {
@@ -201,7 +201,7 @@ Cypress.Commands.add("await", <T>(promise: Promise<T>, wait?: number, throwExcep
     });
 });
 
-Cypress.Commands.add("awaitFor", (promise: Promise<unknown>, wait?: number, throwException = false) => {
+Cypress.Commands.add("awaitFor", (promise: Promise<unknown>, throwException?: boolean, wait?: number) => {
     return cy.then(() => {
         return cy.wrap(null, { log: false }).then(() => {
             if (wait && wait > 0) {
@@ -787,8 +787,8 @@ declare global {
             getByData<E extends Node = HTMLElement>(dataName: string, selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
             getByDataAdv<E extends Node = HTMLElement>(dataName: string, selector: string, moreSelectors: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
 
-            await<T>(promise: Promise<T>, wait?: number, throwException?: boolean): Chainable<T>;
-            awaitFor(promise: Promise<unknown>, wait?: number, throwException?: boolean): Chainable<unknown>;
+            await<T>(promise: Promise<T>, throwException?: boolean, wait?: number): Chainable<T>;
+            awaitFor(promise: Promise<unknown>, throwException?: boolean, wait?: number): Chainable<unknown>;
 
             justWrap(action: (...args: any[]) => any, wait?: number, options?: Partial<Loggable & Timeoutable>): Chainable<any>;
 
