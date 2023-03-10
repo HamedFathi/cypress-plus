@@ -90,7 +90,12 @@ function polling(subject: any, checkFunction: any, originalOptions = {}) {
         if (retries < 1) {
             const msg = options.errorMessage instanceof Function ? options.errorMessage(result, options) : options.errorMessage
             if (options.postFailureAction && options.postFailureAction instanceof Function)
-                return options.postFailureAction();
+            {
+                const fnResult = options.postFailureAction();
+                if (fnResult === true || fnResult === false) {
+                    return fnResult;
+                }
+            }
             if (!options.ignoreFailureException && !options.postFailureAction)
                 throw new Error(msg);
             return;
@@ -762,7 +767,7 @@ export interface PollingOptions<Subject = any> {
     log?: boolean;
     mode: "timeout" | "retry",
     ignoreFailureException?: boolean,
-    postFailureAction?: () => any,
+    postFailureAction?: () => boolean | void,
 }
 
 // TypeScript declaration
