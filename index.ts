@@ -39,7 +39,7 @@ function polling(subject: any, checkFunction: any, originalOptions = {}) {
         customLogCheckMessage: undefined,
         postFailureAction: <any>undefined,
         mode: "timeout",
-        ignoreTimeoutError: false,
+        ignoreFailureException: false,
     }
     const options = { ...defaultOptions, ...originalOptions }
 
@@ -90,8 +90,8 @@ function polling(subject: any, checkFunction: any, originalOptions = {}) {
         if (retries < 1) {
             const msg = options.errorMessage instanceof Function ? options.errorMessage(result, options) : options.errorMessage
             if (options.postFailureAction && options.postFailureAction instanceof Function)
-                options.postFailureAction();
-            if (!options.ignoreTimeoutError && !options.postFailureAction)
+                return options.postFailureAction();
+            if (!options.ignoreFailureException && !options.postFailureAction)
                 throw new Error(msg);
             return;
         }
@@ -120,6 +120,10 @@ Cypress.Commands.add("polling", { prevSubject: "optional" }, polling);
 
 Cypress.Commands.add("clickOnDataCy", (selector: string, options?: any) => {
     return cy.get(`[data-cy="${selector}"]`, options).click(options);
+});
+
+Cypress.Commands.add("clickOnDataCyAdv", (selector: string, moreSelectors: string, options?: any) => {
+    return cy.getByDataCyAdv(selector, moreSelectors, options).click(options);
 });
 
 Cypress.Commands.add("waitForUrlAndVisibleDataCy", (url: string, selector: string, timeout?: number) => {
@@ -757,8 +761,8 @@ export interface PollingOptions<Subject = any> {
     logger?: (logOptions: PollingLog) => any;
     log?: boolean;
     mode: "timeout" | "retry",
-    ignoreTimeoutError?: boolean,
-    postFailureAction?: () => void,
+    ignoreFailureException?: boolean,
+    postFailureAction?: () => any,
 }
 
 // TypeScript declaration
@@ -778,6 +782,8 @@ declare global {
             waitForUrlAndVisibleDataCy(url: string, selector: string, timeout?: number): Chainable<JQuery<HTMLElement>>;
 
             clickOnDataCy(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+            clickOnDataCyAdv(selector: string, moreSelectors: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
+
             rightClickOnDataCy(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElement>>;
 
             getByDataContains<E extends Node = HTMLElement>(dataName: string, selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>;
